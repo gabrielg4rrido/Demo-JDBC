@@ -1,7 +1,6 @@
 package models.entities;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Seller implements Serializable {
@@ -16,8 +15,6 @@ public class Seller implements Serializable {
 	
 	private Department department;
 	
-	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
 	public Seller(Integer id, String name, String email, Date birthDate, Double baseSalary, Department department) {
 		this.id = id;
 		this.name = name;

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,21 +25,92 @@ public class SellerDaoJDBC implements SellerDao {
 	}
 	
 	@Override
-	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+	public void insert(Seller sel) {
+		PreparedStatement stmt = null;
 		
+		try {
+			stmt = connect.prepareStatement("INSERT INTO seller "
+											+"(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+											+ "VALUES "
+											+ "(?, ?, ?, ?, ?)",
+											Statement.RETURN_GENERATED_KEYS);
+		
+			stmt.setString(1, sel.getName());
+			stmt.setString(2, sel.getEmail());
+			stmt.setDate(3, new java.sql.Date(sel.getBirthDate().getTime()));
+			stmt.setDouble(4, sel.getBaseSalary());
+			stmt.setInt(5, sel.getDepartment().getId());
+			
+			int rowsAffected = stmt.executeUpdate();
+			
+			if (rowsAffected > 0) {
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()) {
+					int id = rs.getInt(1);
+					sel.setId(id);
+				}
+			} else {
+				throw new DBException("Unexpected error! No rows affected.");
+			}
+		}
+		catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(stmt);
+		}
 	}
 
 	@Override
-	public void update(Seller obj) {
-		// TODO Auto-generated method stub
+	public void update(Seller sel) {
+		PreparedStatement stmt = null;
 		
+		try {
+			stmt = connect.prepareStatement("UPDATE seller "
+											+"SET Name = ?, Email = ?, BirthDate = ?, "
+											+ "BaseSalary = ?, DepartmentId = ? "
+											+ "WHERE Id = ?",
+											Statement.RETURN_GENERATED_KEYS);
+		
+			stmt.setString(1, sel.getName());
+			stmt.setString(2, sel.getEmail());
+			stmt.setDate(3, new java.sql.Date(sel.getBirthDate().getTime()));
+			stmt.setDouble(4, sel.getBaseSalary());
+			stmt.setInt(5, sel.getDepartment().getId());
+			stmt.setInt(6, sel.getId());
+			
+			stmt.executeUpdate();
+			
+		}
+		catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(stmt);
+		}		
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		PreparedStatement stmt = null;
 		
+		try {
+			stmt = connect.prepareStatement("DELETE FROM seller "
+											+ "WHERE Id = ?");
+		
+			stmt.setInt(1, id);
+			int rowsAffected = stmt.executeUpdate();
+		
+			if(rowsAffected == 0) {
+				throw new DBException("Invalid id. No rows affected.");
+			}
+		}
+		catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(stmt);
+		}		
 	}
 
 	@Override
