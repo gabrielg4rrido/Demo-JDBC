@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import db.DB;
 import db.DBException;
 import models.dao.SellerDao;
 import models.entities.Department;
@@ -64,12 +65,48 @@ public class SellerDaoJDBC implements SellerDao {
 		catch (SQLException e) {
 			throw new DBException(e.getMessage());
 		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(stmt);
+		}
 	}
 
 	@Override
 	public List<Seller> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			stmt = connect.prepareStatement("SELECT seller.*, department.Name as DepName "
+										+ "FROM seller INNER JOIN department "
+										+ "ON seller.DepartmentId = department.Id "
+										+ "ORDER BY Id");
+			rs = stmt.executeQuery();
+			
+			List<Seller> sellers = new ArrayList<>();
+			Map<Integer, Department> mapDeps = new HashMap<>();
+			
+			while(rs.next()) {
+				Department dep = mapDeps.get(rs.getInt("DepartmentId"));
+				
+				if(dep == null) {
+					dep = instantiateDepartment(rs);
+					mapDeps.put(rs.getInt("DepartmentId"), dep);
+				}
+				
+				Seller sel = instantiateSeller(rs, dep);
+				sellers.add(sel);
+				}
+				return sellers;
+		}
+		catch (SQLException e) {
+			throw new DBException(e.getMessage());
+		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(stmt);
+	}
+
 	}
 
 	@Override
@@ -104,6 +141,10 @@ public class SellerDaoJDBC implements SellerDao {
 		}
 		catch (SQLException e) {
 			throw new DBException(e.getMessage());
+		}
+		finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(stmt);
 		}
 	}
 
