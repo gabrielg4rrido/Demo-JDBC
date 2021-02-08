@@ -27,6 +27,8 @@ public class Seller implements Serializable {
 		this.department = department;
 	}
 
+	public Seller() {}
+
 	public String getName() {
 		return name;
 	}
@@ -65,6 +67,10 @@ public class Seller implements Serializable {
 
 	public void setDepartment(Department department) {
 		this.department = department;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public Integer getId() {
